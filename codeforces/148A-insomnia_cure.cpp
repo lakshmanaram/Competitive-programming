@@ -1,0 +1,52 @@
+#include<iostream>
+using namespace std;
+int LCM(int a,int b)
+{
+	if(a>b)
+	{
+		if(a%b==0)
+			return b;
+		else
+			return LCM(a%b,b);
+	}
+	else
+	{
+		if(b%a==0)
+			return a;
+		else
+			return LCM(a,b%a);
+	}
+}
+int HCF(int a,int b)
+{
+	return (a*b)/LCM(a,b);
+}
+int main()
+{
+	int a,b,c,d,n;
+	cin>>a>>b>>c>>d>>n;
+	int ans=0;
+	if(a==1||b==1||c==1||d==1)
+	{
+		cout<<n;
+		return 0;
+	}
+	ans+=n/a;
+	ans+=n/b;
+	ans+=n/c;
+	ans+=n/d;
+	ans-=n/HCF(a,b);
+	ans-=n/HCF(a,c);
+	ans-=n/HCF(a,d);
+	ans-=n/HCF(c,b);
+	ans-=n/HCF(d,b);
+	ans-=n/HCF(c,d);
+	ans+=n/HCF(a,HCF(b,c));
+	ans+=n/HCF(d,HCF(b,c));
+	ans+=n/HCF(a,HCF(d,c));
+	ans+=n/HCF(a,HCF(b,d));
+	ans-=n/HCF(HCF(a,b),HCF(c,d));
+
+	cout<<ans;
+	return 0;
+}
