@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-
 std::string FibonacciCodingIII(std::string a, std::string b) {
     if(a.length()<b.length()){
         std::string temp = a;
@@ -80,6 +79,7 @@ std::string FibonacciCodingIII(std::string a, std::string b) {
     std::reverse(a.begin(),a.end());
     return a;
 }
+
 int main(){
 	std::string a = "110", b = "100";
 	std::cout<<FibonacciCodingIII(a,b);
