@@ -8,47 +8,41 @@ int main()
 {
 	long n;
 	cin>>n;
-	vector<node> a;
-	long maxind,minind;
-	for(long i=0;i<n;i++){
-		node temp;
-		cin>>temp.val;
-		temp.right = temp.left = -1;
-		if(i!=0){
-			if(temp.val > a[maxind].val){
-				a[maxind].right = i;
-				cout<<a[maxind].val<<" ";
-				maxind = i;
-			} else if( temp.val < a[minind].val ){
-				a[minind].left = i;
-				cout<<a[minind].val<<" ";
-				minind = i;
-			} else {
-				long x = 0;
-				while(true){
-					if(a[x].val < temp.val){
-						if(a[x].right == -1){
-							a[x].right = i;
-							cout<<a[x].val<<" ";
-							break;
-						} else {
-							x = a[x].right;
-						}
-					} else {
-						if(a[x].left == -1){
-							a[x].left = i;
-							cout<<a[x].val<<" ";
-							break;
-						} else {
-							x = a[x].left;
-						}
-					}
-				}
+	vector<node> a(n);
+	map<long long,long> key_map;
+	// vector<long long> par(n);
+	set<long long> arr;
+	cin>>a[0].val;
+	a[0].right = a[0].left = -1;
+	arr.insert(a[0].val);
+	key_map[a[0].val] = 0;
+	set<long long>::iterator low, high;
+	for(long i=1;i<n;i++){
+		cin>>a[i].val;
+		key_map[a[i].val] = i;
+		a[i].right = a[i].left = -1;
+		high = arr.upper_bound(a[i].val);
+		if(high == arr.begin()){
+			// par[i] = *high;
+			cout<<*high<<" ";
+			a[key_map[*high]].left = i;
+		}else{
+			low = --high;
+			++high;
+			if(a[key_map[*low]].right==-1){
+				a[key_map[*low]].right = i;
+				// par[i] = *low;
+				cout<<*low<<" ";
+			}else{
+				// par[i] = *high;
+				cout<<*high<<" ";
+				a[key_map[*high]].left = i;
 			}
-		} else {
-			maxind = minind = 0;
 		}
-		a.push_back(temp);
+		arr.insert(a[i].val);
 	}
+	// for(long i=1;i<n;i++){
+	// 	cout<<par[i]<<" ";
+	// }
 	return 0;
 }
