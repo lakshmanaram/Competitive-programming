@@ -7,106 +7,63 @@ int main(){
         long n;
         cin>>n;
         vector<long long> arr(n);
+        bool allneg = true;
         for(long i=0;i<n;i++){
             cin>>arr[i];
+            if(arr[i]>0)
+                allneg = false;
         }
         long long maxval,sum;
         maxval = *max_element(arr.begin(),arr.end());
-        vector<long long>::iterator left,right;
-        left = right = arr.begin();
-        bool k_used = false;
-        sum = 0;
-        long noe_used = 0;
-        long long minele_used;
-        while(right!=arr.end()){
-            if(k_used && sum + minele_used>=0 && minele_used > *right){
-                sum += minele_used;
-                noe_used++;
-                k_used = false;
-                if(noe_used!=0)
-                    maxval = max(maxval,sum);
-            }
-            sum += *right;
-            if(sum <=0 && k_used){
-                sum -= *right;
-                if(noe_used!=0)
-                    maxval = max(maxval,sum);
-                break;
-            }else if(sum<=0){
-                k_used = true;
-                sum -= *right;
-                minele_used = *right;
-                right++;
-                continue;
-            }
-            // cout<<"Increasing 2 for "<<*right<<endl;
-            right++;
-            noe_used++;
-        }
-        if(noe_used!=0)
-            maxval = max(maxval,sum);
-        else{
+        if(allneg)
             cout<<maxval<<endl;
-            continue;
+        else{
+            sum=0;
+            vector<pair<pair<long long, long long>,long long> > ans_pairs;
+            long long minele = 0;
+            long long maxsum = 0;
+            for(long i=0;i<arr.size();i++){
+                sum += arr[i];
+                minele = min(minele,arr[i]);
+                maxsum += arr[i];
+                if(maxsum < 0)
+                    maxsum = 0;
+                maxval = max(maxval,maxsum);
+                if(arr[i]<0){
+                    ans_pairs.push_back(make_pair(make_pair(sum,minele),maxsum));
+                    sum = 0;
+                    minele = 0;
+                }
+            }
+            if(!(sum==0 && minele==0))
+                ans_pairs.push_back(make_pair(make_pair(sum,minele),maxsum));
+            long long presum=0;
+            for(long i = ans_pairs.size()-1;i>=0;i--){
+                long long tempsum = ans_pairs[i].first.first, tempmin = ans_pairs[i].first.second;
+                long long tempval;
+                if(i!=0)
+                    tempval = ans_pairs[i-1].second;
+                else
+                    tempval = 0;
+                // cout<<"presum = "<<presum<<" tempsum = "<<tempsum<<" tempmin = "<<tempmin<<" maxsum = "<<tempval<<endl;
+                if(tempmin<0){
+                    maxval = max(presum+tempsum-tempmin+tempval,maxval);
+                    // cout<<"maxval inside = "<<maxval<<endl;
+                }else{
+                    maxval = max(presum+tempsum+tempval,maxval);
+                    // cout<<"maxval else = "<<maxval<<endl;
+                }
+                if(tempmin + presum < 0){
+                    if(tempmin < 0)
+                        presum = tempsum-tempmin;
+                    else
+                        presum = tempsum;
+                }
+                else
+                    presum += tempsum;
+            }
+            cout<<maxval<<endl;
         }
-        while(left!=arr.end()||right!=arr.end()){
-            long long prevsum = sum;
-            if(!k_used){
-                minele_used = *min_element(left,right);
-                if(minele_used >= 0)
-                    break;
-                sum -= minele_used;
-                maxval = max(sum,maxval);
-                k_used = true;
-            }
-            while(left!=arr.end() && k_used){
-                //cout<<"Inside left for "<<*left<<endl;
-                if(*left!=minele_used){
-                    sum -= *left;
-                    noe_used--;
-                    if(prevsum < sum){
-                //        cout<<"Going out of presum"<<endl;
-                        if(noe_used!=0)
-                            maxval = max(maxval,sum);
-                        left++;
-                        break;
-                    }
-                } else{
-                //    cout<<"Going out of min_ele"<<endl;
-                    minele_used = 0;
-                    k_used = false;
-                }
-                left++;
-            }
-            while(right!=arr.end()){
-                if(k_used && sum + minele_used>=0 && minele_used > *right){
-                    sum += minele_used;
-                    noe_used++;
-                    k_used = false;
-                    if(noe_used!=0)
-                        maxval = max(maxval,sum);
-                }
-                sum += *right;
-                if(sum <=0 && k_used){
-                    sum -= *right;
-                    if(noe_used!=0)
-                        maxval = max(maxval,sum);
-                    break;
-                }else if(sum<=0){
-                    k_used = true;
-                    sum -= *right;
-                    minele_used = *right;
-                    right++;
-                    continue;
-                }
-                // cout<<"Increasing 2 for "<<*right<<endl;
-                right++;
-                noe_used++;
-            }
-        }
-        if(noe_used!=0)
-            maxval = max(maxval,sum);
-        cout<<maxval<<endl;
     }
     return 0;
 }
