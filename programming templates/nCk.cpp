@@ -1,7 +1,25 @@
 #include <bits/stdc++.h>
 using namespace std;
-vector<long long> factorial;
 long long mod;
+/*
+long long pow(long long a, long long b) {
+long long x = 1, y = a;
+    while(b > 0) {
+        if(b%2 == 1) {
+            x=(x*y);
+            if(x>mod) x%=mod;
+        }
+        y = (y*y);
+        if(y>mod) y%=mod;
+        b /= 2;
+    }
+    return x;
+}
+long long mmi(long long a) {
+    return pow(a,mod-2);
+}
+*/
+vector<long long> factorial;
 vector<long long> modInverseArray;
 long long mmi(long long n) {
 	if(modInverseArray.size() > n)
