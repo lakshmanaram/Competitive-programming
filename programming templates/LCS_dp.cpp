@@ -23,7 +23,7 @@ long lcs(string x, string y){
 }
 
 int main(){
-	string x = "hello" ,y = "hola", z = "hey"; 
+	string x = "iamagenius" ,y = "gethusachin", z = "hey"; 
 	cout<<"Length of the Longest Common Subsequence between the strings "<<x<<" and "<<y<<" is "<<lcs(x,y)<<endl;
 	cout<<"Length of the Longest Common Subsequence between the strings "<<y<<" and "<<z<<" is "<<lcs(y,z)<<endl;
 	cout<<"Length of the Longest Common Subsequence between the strings "<<z<<" and "<<x<<" is "<<lcs(z,x)<<endl;

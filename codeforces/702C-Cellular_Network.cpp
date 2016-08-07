@@ -13,7 +13,8 @@ int main(){
 	sort(cities.begin(),cities.end());
 	sort(cns.begin(),cns.end());
 	long long maxv = 0, cnsp = 0;
-	for(long i=0;i<n && cnsp <m;i++){
+	long i;
+	for(i=0;i<n && cnsp <m;i++){
 		long long minv;
 		minv = abs(cities[i] - cns[cnsp]);
 		while(cities[i] >= cns[cnsp] && cnsp < m){
@@ -30,6 +31,7 @@ int main(){
 		maxv = max(maxv,minv);
 		// cout<<cities[i]<<" "<<minv<<endl;
 	}
-	maxv = max(maxv, abs(cities[cities.size()-1] - cns[cns.size()-1]));
+	if(i!=n)
+		maxv = max(maxv, abs(cities[cities.size()-1] - cns[cns.size()-1]));
 	cout<<maxv;
 }
