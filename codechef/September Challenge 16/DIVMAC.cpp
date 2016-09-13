@@ -2,71 +2,76 @@
 #include <bits/stdc++.h>
 #define ll long long 
 using namespace std;
-bool arr[1000001];
-vector<long long> primes;
-bool isprime(int a) {
-    if(arr[a]==false)
-        return true;
-    return false;
-}
-void markMultiples(int a, int n) {
-    int i = 2, num;
+long primes[1000001];
+void markMultiples(long a, long n) {
+    long i = 2, num;
     while ( (num = i*a) <= n ) {
-        arr[num] = true;
+        if(primes[num] == 1)
+			primes[num] = a;
         ++i;
     }
 }
-void SieveOfEratosthenes(int n) {
-    fill(arr,arr+1000001,false);
-    for (int i=2; i<n; ++i)
-        if ( arr[i] == false ){
-        	primes.push_back(i);
+void SieveOfEratosthenes(long n) {
+    fill(primes,primes+1000001,1);
+    for (long i=2; i<n; ++i)
+        if ( primes[i] == 1 ){
+        	primes[i] = i;
             markMultiples(i, n);
         }
-}
-long long get_lpd(long long a){
-	if(a==1)
-		return 1;
-	if(isprime(a))
-		return a;
-	for(long i=0;;i++){
-		if(a%primes[i] == 0)
-			return primes[i];
-	}
-}
-long long get_max_lpd(long long a, long long b){
-	if(a == 1)
-		return b;
-	if(b == 1)
-		return a;
-	return max(a,b);
 }
 class node{
 public:
 	long long val;
-	long long lpd; // least prime divisor
+	vector<long> lpd;
+	long ind;
 };
 class segment_tree{
 public:
 	vector<node> tnodes;
 	vector<node> arr;
+	vector<long> lazy;
 	void build_segment_tree(long index, long start, long end) {
 		// cout<<index<<" range "<<start<<" -> "<<end<<endl;
 		if(start == end){
 			// leaf node
-			node temp;
-			temp.lpd = 1;
 			if(tnodes.size() <= index)
-				tnodes.resize(index+1,temp);
+				tnodes.resize(index+1);
 			tnodes[index].val = arr[start].val;
-			tnodes[index].lpd = get_lpd(tnodes[index].val);
-			// cout<<start<<" -> "<<tnodes[index].lpd<<" of "<<tnodes[index].val<<endl;
+			tnodes[index].ind = 0;
+			long long temp = tnodes[index].val;
+			if(tnodes[index].lpd.size()==0)
+				tnodes[index].lpd.push_back(primes[temp]);
+			temp /= tnodes[index].lpd[0];
+			while(temp!=1){
+				tnodes[index].lpd.push_back(primes[temp]);
+				temp /= tnodes[index].lpd[tnodes[index].lpd.size()-1];
+			}
+			tnodes[index].lpd.push_back(1);
 		} else {
 			long mid = (start+end)/2;
 			build_segment_tree(2*index+1,start,mid);
 			build_segment_tree(2*index+2,mid+1,end);
-			tnodes[index].lpd = get_max_lpd(tnodes[2*index+1].lpd,tnodes[2*index+2].lpd);
-			// cout<<index<<" represents "<<start<<" -> "<<end<<" has "<<tnodes[index].lpd<<endl;
+			tnodes[index].ind = 0;
+			vector<long> lpd1 = tnodes[2*index+1].lpd;
+			vector<long> lpd2 = tnodes[2*index+2].lpd;
+			int i=0, j=tnodes[2*index+1].ind, k = tnodes[2*index+2].ind;
+			tnodes[index].lpd.resize(max(lpd1.size()-j,lpd2.size()-k),1);
+			while(j<lpd1.size() && k<lpd2.size()){
+				tnodes[index].lpd[i] = max(lpd1[j],lpd2[k]);
+				i++;
+				j++;
+				k++;
+			}
+			while(j<lpd1.size()) {
+				tnodes[index].lpd[i] = lpd1[j];
+				i++;
+				j++;
+			}
+			while(k<lpd2.size()) {
+				tnodes[index].lpd[i] = lpd2[k];
+				i++;
+				k++;
+			}
 		}
 	}
 	segment_tree(long n){
@@ -74,54 +79,85 @@ public:
 		for(long i=0;i<n;i++)
 			cin>>arr[i].val;
 		build_segment_tree(0,0,n-1);
-		// show_tnodes();
-		// show_arr();
+		lazy.resize(tnodes.size(),0);
 	}
-	long long query_range(long index, long start, long end, long l, long r) {
+	long long query_range(long index, long start, long end, long l, long r, long long curmax) {
 		if(start > r || end < l || start > end)
 			return 1;
-		if(start >= l && end <= r)
-			return tnodes[index].lpd;
-		if(tnodes[index].lpd == 1)
+		if(tnodes[index].lpd[tnodes[index].ind] == 1)
 			return 1;
+		while(lazy[index] > 0){
+			if(tnodes[index].lpd[tnodes[index].ind] != 1){
+				tnodes[index].ind++;
+				if(start != end){
+					lazy[2*index + 1]++;
+					lazy[2*index + 2]++;
+				}
+			}
+			lazy[index]--;
+		}
+		if(tnodes[index].lpd[tnodes[index].ind] <= curmax)
+			return 1;
+		if(start >= l && end <= r){
+			curmax = tnodes[index].lpd[tnodes[index].ind];
+			return tnodes[index].lpd[tnodes[index].ind];
+		}
 		long mid = (start+end)/2;
-		long long val1 = query_range(2*index+1,start,mid,l,r);
-		long long val2 = query_range(2*index+2,mid+1,end,l,r);
-		return get_max_lpd(val1,val2);
+		long long val1 = query_range(2*index+1,start,mid,l,r,curmax);
+		long long val2 = query_range(2*index+2,mid+1,end,l,r,curmax);
+		return max(val1,val2);
 	}
 	void update_range(long index, long start, long end, long l, long r){
+		while(lazy[index] > 0){
+			if(tnodes[index].lpd[tnodes[index].ind] != 1){
+				tnodes[index].ind++;
+				if(start != end){
+					lazy[2*index + 1]++;
+					lazy[2*index + 2]++;
+				}
+			}
+			lazy[index]--;
+		}
 		if(start > end || start > r || end < l)
 			return;
-		if(tnodes[index].lpd == 1)
+		if(tnodes[index].lpd[tnodes[index].ind] == 1)
 			return;
-		if(start == end){
-			tnodes[index].val /= tnodes[index].lpd;
-			tnodes[index].lpd = get_lpd(tnodes[index].val);
+		if(start >= l && r >= end){
+			if(tnodes[index].lpd[tnodes[index].ind] != 1){
+				tnodes[index].ind++;
+				if(start != end){
+					lazy[2*index + 1]++;
+					lazy[2*index + 2]++;
+				}
+			}
 			return;
 		} else {
 			long mid = (start+end)/2;
 			update_range(2*index+1, start, mid, l, r);
 			update_range(2*index+2, mid+1, end, l, r);
-			tnodes[index].lpd = get_max_lpd(tnodes[2*index+1].lpd,tnodes[2*index+2].lpd);
+
+			vector<long> lpd1 = tnodes[2*index+1].lpd;
+			vector<long> lpd2 = tnodes[2*index+2].lpd;
+			int i=0, j=tnodes[2*index+1].ind, k = tnodes[2*index+2].ind;
+			tnodes[index].lpd.resize(max(lpd1.size()-j,lpd2.size()-k),1);
+			while(j<lpd1.size() && k<lpd2.size()){
+				tnodes[index].lpd[i] = max(lpd1[j],lpd2[k]);
+				i++;
+				j++;
+				k++;
+			}
+			while(j<lpd1.size()) {
+				tnodes[index].lpd[i] = lpd1[j];
+				i++;
+				j++;
+			}
+			while(k<lpd2.size()) {
+				tnodes[index].lpd[i] = lpd2[k];
+				i++;
+				k++;
+			}
+			tnodes[index].ind = 0;
 		}
-	}
-	void update_query() {
-		//update range
-		long l,r;
-		cin>>l>>r;
-		update_range(0,0,arr.size()-1,l-1,r-1);
-		// show_tnodes();
-		// show_arr();
-	}
-	void show_tnodes() {
-		for(long i=0;i<tnodes.size();i++)
-			cout<<tnodes[i].lpd<<" ";
-		cout<<endl;
-	}
-	void show_arr() {
-		for(long i=0;i<arr.size();i++)
-			cout<<arr[i].val<<" ";
-		cout<<endl;
 	}
 };
 int main(){
@@ -134,13 +170,13 @@ int main(){
 		segment_tree st(n);
 		while(m--){
 			int choice;
-			cin>>choice;
+			long l,r;
+			scanf("%d %ld %ld",&choice,&l,&r);			
 			if(choice == 0)
-				st.update_query();
+				st.update_range(0,0,n-1,l-1,r-1);
 			else{
-				long l,r;
-				cin>>l>>r;
-				cout<<st.query_range(0,0,n-1,l-1,r-1)<<" ";
+				long long ans = 1;
+				printf("%lld ",st.query_range(0,0,n-1,l-1,r-1,ans));
 			}
 		}
 		cout<<endl;
