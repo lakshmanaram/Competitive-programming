@@ -2,25 +2,24 @@
 #include<bits/stdc++.h>
 using namespace std;
 vector<bool> vis;
-struct gnode{                                                                   //individual node element
-    long long key;                                                              //key value of that particular node
-    vector<int> children;                                                       //children index values
+struct gnode{
+    long long key;
+    vector<int> children;
 };
 class graph{
     public:
-    int nodes;                                                                  //number of nodes
+    int nodes;
     vector<gnode> gnodes;
-    graph(int k){                                                               //constructor which takes number of nodes as input
+    graph(int k){
     	nodes = k;
         gnodes.resize(k);
         vis.resize(k);
         fill(vis.begin(),vis.end(),false);
-        for(int i=0;i<nodes;i++){                                               // gets input for the key values
+        for(int i=0;i<nodes;i++){
         	cin>>gnodes[i].key;
         }
     }
     void dfs_recurse(int n){
-        // cout<<n<<" ";
         vector<int>::iterator it;
         for(it = gnodes[n].children.begin();it!=gnodes[n].children.end();it++)
             if(vis[*it]==false){
@@ -34,7 +33,7 @@ class graph{
         vis[n] = true;
         dfs_recurse(n);
     }
-    void add_node(int c, int k){                                                //initializes graph nodes 0-indexed
+    void add_node(int c, int k){
         gnodes[c].children.push_back(k);
         gnodes[k].children.push_back(c);
     }
@@ -50,10 +49,10 @@ class graph{
 };
 int main(){
     int n,e;
-    cin>>n;                                                                     //number of nodes
-    cin>>e;                                                                     //number of edges
+    cin>>n;
+    cin>>e;
     graph g(n);
-    for(int i=0;i<e;i++){                                                       //adding all the edges
+    for(int i=0;i<e;i++){
         int a,b;
         cin>>a>>b;
         g.add_node(a,b);

@@ -11,13 +11,11 @@ public:
     vector<node> nodes;
 
     tree(long n){
-    // n -> number of nodes
         nodes.resize(n);
-        // Getting in put for nodes
         for(long i=1;i<n;i++){
             long x,y;
             cin>>x>>y;
-            x--,y--;            // in case the cities are 1-indexed
+            x--,y--;
             nodes[x].children.push_back(y);
             nodes[y].children.push_back(x);
         }
@@ -35,7 +33,6 @@ public:
         }
     }
     void root_the_tree(long x){
-        // x becomes the new root
         root_the_tree_util(x,-1,0);
     }
     void print_the_tree(void) {
