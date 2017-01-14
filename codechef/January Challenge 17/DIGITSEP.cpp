@@ -3,9 +3,12 @@
 #define mp make_pair 
 #define pb push_back
 #define ll long long 
+#define sll set<ll> 
 using namespace std;
 ll gcd(ll a, ll b) {
-    if(a <= 0)
+    if(a == 0 && b == 0)
+        return 0;
+    if(a == 0)
         return b;
     if(b == 0)
         return a;
@@ -13,7 +16,6 @@ ll gcd(ll a, ll b) {
 }
 string s;
 int n,m,x,y;
-ll maxgcd = 1;
 ll get_digit(int start, int no){
     ll ans = 0;
     for(int i=start;i<start+no;i++){
@@ -22,37 +24,51 @@ ll get_digit(int start, int no){
     }
     return ans;
 }
-void func(int start, int sep_placed, long long gcdn) {
-    // cout<<"start = "<<start<<endl;
-    if(start == n) {
-        if(sep_placed >= x) {
-            maxgcd = max(maxgcd,gcdn);
-        }
-        return;
-    }
-    if(sep_placed == y) {
+sll none;
+vector<vector<sll > > ans;
+void func(int start, int sep_placed, sll &maxgcd, int seps) {
+    if(sep_placed == seps) {
         if(n-start <= m) {
             long long g = get_digit(start,n-start);
-            maxgcd = max(maxgcd,gcd(gcdn,g));
+            maxgcd.insert(g);
         }
         return;
     }
-    if((y-sep_placed+1)*m < n-start || (gcdn!=-1 && gcdn <= maxgcd))
+    if((seps-sep_placed+1)*m < n-start)
         return;
-    for(int i=1;i<=m && start + i <= n;i++){
+    for(int i=1;i<=m && start + i < n;i++){
         long long g = get_digit(start,i);
-        // cout<<"using "<<i<<" g = "<<g<<endl;
-        // cout<<"calling start = "<<start+i<<endl;
-        func(start+i,sep_placed+1,gcd(gcdn,g));
+        sll tempgcd = ans[start+i][seps-sep_placed-1];
+        for(sll::iterator it = tempgcd.begin();it!=tempgcd.end();it++){
+            maxgcd.insert(gcd(g,*it));
+        }
     }
 }
 int main() {
     int t;
     cin>>t;
     while(t--) {
-        maxgcd = 1;
+        ans.clear();
         cin>>n>>s>>m>>x>>y;
-        func(0,0,-1);
-        cout<<maxgcd<<endl;
+        vector<sll > temp(y+1);
+        ans.resize(n,temp);
+        for(int i=n-1;i>=0;i--) {
+            for(int j = 0;j<=y;j++) {
+                sll maxgcd;
+                func(i,0,maxgcd,j);
+                ans[i][j] = maxgcd;
+            }
+        }
+        ll ans_final = 0;
+        for(int i=x;i<=y;i++) {
+            sll maxgcd = ans[0][i];
+            if(maxgcd.size()!=0){
+                sll::iterator it = maxgcd.end();
+                it--;    
+                if(*it > ans_final)
+                    ans_final = *it;
+            }
+        }
+        cout<<ans_final<<endl;
     }
 }

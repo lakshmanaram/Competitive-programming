@@ -1,13 +1,14 @@
 #include <bits/stdc++.h>
+#defind pii pair<int,int>
 using namespace std;
-double distance_pts(pair<int,int> a, pair<int,int> b){
+double distance_pts(pii a, pii b){
 	return sqrt(pow(a.first - b.first,2)+pow(a.second - b.second,2));
 }
-double slope(pair<int,int> a, pair<int,int> b){
+double slope(pii a, pii b){
 	// gives slope of the line ab - cannot give infinity slope
 	return (double)(b.second - a.second)/(b.first - a.first);
 }
-double angle_pt_ray(pair<int,int> a, pair<int,int> b, pair<int, int> c){
+double angle_pt_ray(pii a, pii b, pii c){
 	// finds angle Labc in the same order => ba is the ray, c is the point
 	if((c.first - a.first) == 0 && (c.first - b.first) == 0)
 		return 0;
@@ -17,7 +18,7 @@ double angle_pt_ray(pair<int,int> a, pair<int,int> b, pair<int, int> c){
 	double radians = acos((pow(ab,2) + pow(bc,2) - pow(ca,2))/(2*ab*bc));
 	return radians*180/3.1415926536;
 }
-bool isPtrightofRay(pair<int,int> a, pair<int,int> b, pair<int, int> c){
+bool isPtrightofRay(pii a, pii b, pii c){
 	// if a is striclty to the right of bc ray and Labc <=90
 	double angle = angle_pt_ray(a,b,c);
 	if(angle == 0 || angle > 90)
@@ -25,7 +26,7 @@ bool isPtrightofRay(pair<int,int> a, pair<int,int> b, pair<int, int> c){
 	double x;
 	return (a.second-b.second)*(c.first-b.first) < (a.first-b.first)*(c.second-b.second);
 }
-bool isPtLeftofRay(pair<int,int> a, pair<int,int> b, pair<int, int> c){
+bool isPtLeftofRay(pii a, pii b, pii c){
 	// if a is striclty to the left of bc ray and Labc <=90
 	double angle = angle_pt_ray(a,b,c);
 	if(angle == 0 || angle > 90)
@@ -36,7 +37,7 @@ bool isPtLeftofRay(pair<int,int> a, pair<int,int> b, pair<int, int> c){
 int main(){
 	int n;
 	cin>>n;
-	vector<pair<int, int> > points(n);
+	vector<pii > points(n);
 	for(int i=0;i<n;i++){
 		cin>>points[i].first>>points[i].second;
 	}
