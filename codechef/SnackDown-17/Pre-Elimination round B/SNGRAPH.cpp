@@ -74,7 +74,10 @@ public:
 			for(long long  j=0;j<deg_edges[i].size();j++){
 				pll edge = deg_edges[i][j];
 				if(nodes[edge.first].there && nodes[edge.second].there) {
-					if(!find(edge.first,edge.second)) noc--;
+					if(!find(edge.first,edge.second)) {
+						noc--;
+						union_op(edge.first,edge.second);
+					}
 				} else if(nodes[edge.first].there) {
 					initialize(edge.second);
 					union_op(edge.first,edge.second);
