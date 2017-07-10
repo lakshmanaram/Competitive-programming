@@ -1,3 +1,6 @@
 *.out
 *.vvp
 *.txt
+doomsday_fuel.py
+grand_staircase.py
+bomb_baby.py

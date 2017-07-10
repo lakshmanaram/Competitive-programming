@@ -34,7 +34,9 @@ int main(){
                     flag = true;
                 } else {
                     int rem = mean*6 - mini - maxi-med*2;
-                    int maxval = maxi+med;
+                    int maxx = min(maxi,2*med-mini);
+                    int mixx = max(mini,2*med-maxi);
+                    int maxval = maxi+maxx;
                     int minval = mini+med;
                     if(rem >= minval && rem <= maxval){
                         ans = 6;
