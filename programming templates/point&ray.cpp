@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#defind pii pair<int,int>
+#define pii pair<int,int>
 using namespace std;
 double distance_pts(pii a, pii b){
 	return sqrt(pow(a.first - b.first,2)+pow(a.second - b.second,2));
