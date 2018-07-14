@@ -190,3 +190,193 @@ int main(){
     }
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Variation of the template
+=====================================================================
+// Heavy Light Decomposition
+#include <bits/stdc++.h>
+using namespace std;
+#define pb push_back
+class segment_tree{
+public:
+    vector<long> tnodes;
+    vector<long> arr;
+    void build_segment_tree(long index, long start, long end) {
+        if(start == end){
+            // leaf node
+            if(tnodes.size() <= index)
+                tnodes.resize(index+1);
+            tnodes[index] = arr[start];
+        } else {
+            long mid = (start+end)/2;
+            build_segment_tree(2*index+1,start,mid);
+            build_segment_tree(2*index+2,mid+1,end);
+            tnodes[index] = max(tnodes[2*index+1],tnodes[2*index+2]);
+        }
+    }
+    long query_range(long index, long start, long end, long l, long r) {
+        if(start > r || end < l)
+            return 0;
+        if(start >= l && end <= r)
+            return tnodes[index];
+        long mid = (start+end)/2;
+        long val1 = query_range(2*index+1,start,mid,l,r);
+        long val2 = query_range(2*index+2,mid+1,end,l,r);
+        return max(val1,val2);
+    }
+    void display () {
+        for (long i = 0; i < arr.size(); i++) {
+            cout << i << " " << arr[i] << endl;
+        }
+        cout << endl;
+        for (long i = 0; i < tnodes.size(); i++) {
+            cout << i << " " << tnodes[i] << endl;
+        }
+    }
+};
+struct gnode{
+    long long val;
+    vector<long> children;
+    long chain_index, pos;
+    long sub_size, parent, rank;
+    gnode(){
+        parent = -1;
+        chain_index = -1;
+    }
+};
+class HLD {
+public:
+    segment_tree st;
+    vector<gnode> gnodes;
+    vector<bool> vis;
+    long chain_no, index;
+    vector<long> chain_head;
+    HLD(long n) {
+        gnodes.resize(n);
+        for(long i=0;i<n;i++){
+            long long c;
+            cin >> c;
+            // scanf("%ld", &c);
+            gnodes[i].val = c;
+        }
+        for(long i=0;i<n-1;i++){
+            long a, b;
+            cin >> a >> b;
+            add_edge(a-1,b-1);
+        }
+        long q;
+        cin >> q;
+        dfs(0,-1,0);
+        chain_no = index = 0;
+        main_hld(0);
+        st.build_segment_tree(0,0,st.arr.size()-1);
+        // st.display();
+        while(q--) {
+            long a, b;
+            cin >> a >> b;
+            printf("%ld\n",query(a-1,b-1));
+        }
+    }
+    void add_edge(long a, long b) {
+        gnodes[a].children.pb(b);
+        gnodes[b].children.pb(a);
+    }
+    void dfs(long cur_node, long parent, long rank) {
+        long sub_sum = 0;
+        for(long i=0; i < gnodes[cur_node].children.size(); i++) {
+            if(gnodes[cur_node].children[i] != parent) {
+                long x = gnodes[cur_node].children[i];
+                dfs(x,cur_node,rank+1);
+                sub_sum += gnodes[x].sub_size;
+            }
+        }
+        gnodes[cur_node].parent = parent;
+        gnodes[cur_node].rank = rank;
+        gnodes[cur_node].sub_size = sub_sum+1;
+    }
+    void main_hld(long n) {
+        if(chain_head.size() == chain_no)
+            chain_head.pb(n);
+        gnodes[n].chain_index = chain_no;
+        gnodes[n].pos = index++;
+        st.arr.pb(gnodes[n].val);
+        // cout << gnodes[n].val <<" " << n << " is added at " << gnodes[n].pos << "\n";
+        long schild = -1;
+        for(long i=0;i<gnodes[n].children.size(); i++) {
+            long x = gnodes[n].children[i];
+            if(gnodes[n].parent == x) continue;
+            if(schild == -1 || gnodes[schild].sub_size < gnodes[x].sub_size) {
+                schild = x;
+            }
+        }
+        if(schild != -1)
+            main_hld(schild);
+        for(long i=0;i<gnodes[n].children.size(); i++) {
+            long x = gnodes[n].children[i];
+            if(gnodes[n].parent == x || schild == x ) continue;
+            chain_no++;
+            main_hld (x);
+        }
+    }
+    long lca(long a, long b) {
+        long heada = chain_head[gnodes[a].chain_index];
+        long headb = chain_head[gnodes[b].chain_index];
+        while(heada != headb) {
+            if(gnodes[heada].rank < gnodes[headb].rank){
+                b = gnodes[headb].parent;
+                headb = chain_head[gnodes[b].chain_index];
+            } else {
+                a = gnodes[heada].parent;
+                heada = chain_head[gnodes[a].chain_index];
+            }
+        }
+        while (gnodes[a].rank < gnodes[b].rank)
+            return a;
+        return b;
+    }
+    long query(long a, long b) {
+        long lca_ab = lca(a,b);
+        return max(query_util(a,lca_ab),query_util(b,lca_ab));
+    }
+    long query_util(long a, long b) {
+        long ans = 0;
+        // cout << "so far ans for " << a << " " << b << " is ";
+        while(gnodes[a].chain_index != gnodes[b].chain_index) {
+            ans = max(ans,st.query_range(0, 0, st.arr.size()-1, gnodes[chain_head[gnodes[a].chain_index]].pos, gnodes[a].pos));
+            a = chain_head[gnodes[a].chain_index];
+            a = gnodes[a].parent;
+        }
+        // cout << ans;
+        if(a==b) {
+            // cout << " finally1 " << gnodes[a].pos << " " << max(ans,st.query_range(0, 0, st.arr.size()-1, gnodes[a].pos, gnodes[a].pos)) << endl;
+            return max(ans,st.query_range(0, 0, st.arr.size()-1, gnodes[a].pos, gnodes[a].pos));
+        }
+        else{
+            // cout << " finally1 " << max(ans,st.query_range(0, 0, st.arr.size()-1, gnodes[b].pos+1, gnodes[a].pos)) << endl;
+            return max(ans,st.query_range(0, 0, st.arr.size()-1, gnodes[b].pos+1, gnodes[a].pos));
+        }
+    }
+};
+int main(){
+    long n;
+    cin>>n;
+    HLD h(n);
+    return 0;
+}
+*/
